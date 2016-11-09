@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="DyingLightProgressView">
+        <attr name="shape_color" format="color" />
+        <attr name="shape_size" format="float" />
+        <attr name="shape_form" format="enum">
+            <enum name="circle" value="0" />
+            <enum name="rectangle" value="1" />
+            <enum name="image" value="2" />
+        </attr>
+        <attr name="stroke_size" format="integer" />
+        <attr name="stroke_color" format="color" />
+        <attr name="animation_duration" format="integer" />
+    </declare-styleable>
+</resources>
