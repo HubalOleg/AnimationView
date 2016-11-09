@@ -12,11 +12,13 @@
     tools:context="com.oleg.hubal.animationview.MainActivity">
 
     <com.oleg.hubal.animationview.DyingLightProgressView
+        android:id="@+id/rectangle_custom_view"
         android:layout_width="100dp"
         android:layout_height="100dp"
         app:shape_color="#861a50"
         app:shape_form="rectangle"
         app:stroke_color="#a71d1d"
+        app:animation_duration="1500"
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true" />
 
@@ -33,11 +35,11 @@
     <com.oleg.hubal.animationview.DyingLightProgressView
         android:layout_width="200dp"
         android:layout_height="200dp"
-        app:shape_color="#00FF00"
+        app:shape_color="#7d20ff"
         app:shape_form="circle"
         app:stroke_size="20"
         app:stroke_color="@color/colorAccent"
-        app:shape_size="2"
+        app:shape_size="1.5"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true" />
 </RelativeLayout>

@@ -14,6 +14,7 @@ import android.graphics.Path;
 import android.graphics.Point;
 import android.os.Handler;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.View;
 
 import java.util.ArrayList;
@@ -46,6 +47,8 @@ public class DyingLightProgressView extends View {
     private ArrayList<MotionShape> mShapeList;
     private MotionShape mCenterShape;
 
+    private OnProgressStateListener progressStateListener;
+
     private Handler mHandler = new Handler();
 
     private Bitmap mSmallBitmap, mBigBitmap;
@@ -54,6 +57,7 @@ public class DyingLightProgressView extends View {
 
     public DyingLightProgressView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        progressStateListener = null;
         setupAttributes(attrs);
         setupPaint();
     }
@@ -80,6 +84,20 @@ public class DyingLightProgressView extends View {
         mShapeOffset = mSmallShapeSize;
         createShapes();
         startAnimation();
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        boolean result = super.onTouchEvent(event);
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            mAnimationDuration = 300;
+            return true;
+        }
+        return result;
+    }
+
+    public void setOnProgressStateListener(OnProgressStateListener listener) {
+        progressStateListener = listener;
     }
 
     private void setupPaint() {
@@ -160,6 +178,13 @@ public class DyingLightProgressView extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
+        for (int firstShape = 0; firstShape < mShapeList.size(); firstShape++) {
+            int secondShape = (firstShape + 1) % mShapeList.size();
+            drawShapeLine(canvas, mShapeList.get(firstShape), mShapeList.get(secondShape));
+        }
+        drawShapeLine(canvas, mShapeList.get(0), mShapeList.get(2));
+        drawShapeLine(canvas, mShapeList.get(1), mShapeList.get(3));
+
         if (mShapeForm == CIRCLE_FORM) {
             drawCircles(canvas);
         } else if (mShapeForm == RECTANGLE_FORM) {
@@ -167,13 +192,6 @@ public class DyingLightProgressView extends View {
         } else if (mShapeForm == IMAGE_FORM) {
             drawImages(canvas);
         }
-
-        for (int firstShape = 0; firstShape < mShapeList.size(); firstShape++) {
-            int secondShape = (firstShape + 1) % mShapeList.size();
-            drawShapeLine(canvas, mShapeList.get(firstShape), mShapeList.get(secondShape));
-        }
-        drawShapeLine(canvas, mShapeList.get(0), mShapeList.get(2));
-        drawShapeLine(canvas, mShapeList.get(1), mShapeList.get(3));
     }
 
     private void drawImages(Canvas canvas) {
@@ -233,12 +251,20 @@ public class DyingLightProgressView extends View {
             } else {
                 shapeAnimator = motionShape.getMoveAnimator();
             }
+            shapeAnimator.setDuration(mAnimationDuration);
             animatorSet.play(shapeAnimator).after(mAnimationDuration / mShapeList.size() * i);
         }
         animatorSet.addListener(new OnAnimationEndListener() {
             @Override
             public void onAnimationEnd(Animator animator) {
                 isViewNarrowed = !isViewNarrowed;
+                if (progressStateListener != null) {
+                    if (isViewNarrowed) {
+                        progressStateListener.onViewNarrowed();
+                    } else {
+                        progressStateListener.onViewExpanded();
+                    }
+                }
                 startAlphaAnimation();
             }
         });
@@ -282,6 +308,11 @@ public class DyingLightProgressView extends View {
         public void onAnimationRepeat(Animator animator) {
 
         }
+    }
+
+    public interface OnProgressStateListener {
+        public void onViewNarrowed();
+        public void onViewExpanded();
     }
 
     private class MotionShape {
@@ -341,7 +372,6 @@ public class DyingLightProgressView extends View {
                 movePath.lineTo(point.x, point.y);
             }
             moveAnimator = ObjectAnimator.ofInt(this, "x", "y", movePath);
-            moveAnimator.setDuration(mAnimationDuration);
 
             Path reverseMovePath = new Path();
             reverseMovePath.moveTo(mShapeWidth / 2, mShapeHeight / 2);
@@ -350,7 +380,6 @@ public class DyingLightProgressView extends View {
                 reverseMovePath.lineTo(point.x, point.y);
             }
             reverseMoveAnimator = ObjectAnimator.ofInt(this, "x", "y", reverseMovePath);
-            reverseMoveAnimator.setDuration(mAnimationDuration);
         }
     }
 }
